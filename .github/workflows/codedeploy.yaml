@@ -1,0 +1,43 @@
+name: Deploy Flask App to AWS CodeDeploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      S3_BUCKET: ${{ secrets.S3_BUCKET }}
+      APPLICATION_NAME: ${{ secrets.APPLICATION_NAME }}
+      DEPLOYMENT_GROUP: ${{ secrets.DEPLOYMENT_GROUP }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS CLI
+        run: |
+          aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+          aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+          aws configure set region $AWS_REGION
+
+      - name: Zip application
+        run: |
+          zip -r app.zip . -x "*.git*" -x ".github/*"
+
+      - name: Upload to S3
+        run: |
+          aws s3 cp app.zip s3://$S3_BUCKET/app.zip
+
+      - name: Trigger CodeDeploy
+        run: |
+          aws deploy create-deployment \
+            --application-name $APPLICATION_NAME \
+            --deployment-group-name $DEPLOYMENT_GROUP \
+            --s3-location bucket=$S3_BUCKET,key=app.zip,bundleType=zip
