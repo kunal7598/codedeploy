@@ -32,6 +32,6 @@ jobs:
       - name: Trigger CodeDeploy
         run: |
           aws deploy create-deployment \
-            --application-name $APPLICATION_NAME \
-            --deployment-group-name $DEPLOYMENT_GROUP \
+            --application-name cmtr-740mo2tq-app \
+            --deployment-group-name cmtr-740mo2tq-dg \
             --s3-location bucket=amzn-s3-code-deploy,key=app.zip,bundleType=zip
