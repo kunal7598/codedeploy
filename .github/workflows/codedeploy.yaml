@@ -27,11 +27,11 @@ jobs:
 
       - name: Upload to S3
         run: |
-          aws s3 sync app.zip s3://$S3_BUCKET/app.zip
+          aws s3 cp app.zip s3://amzn-s3-code-deploy/app.zip
 
       - name: Trigger CodeDeploy
         run: |
           aws deploy create-deployment \
             --application-name $APPLICATION_NAME \
             --deployment-group-name $DEPLOYMENT_GROUP \
-            --s3-location bucket=$S3_BUCKET,key=app.zip,bundleType=zip
+            --s3-location bucket=amzn-s3-code-deploy,key=app.zip,bundleType=zip
